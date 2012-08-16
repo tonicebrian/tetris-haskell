@@ -13,7 +13,9 @@ executable tetrix
   ghc-prof-options: -prof -caf-all -auto-all
   Build-Depends:    base >= 4,
                     containers >= 0.4,
-                    gtk
+                    gtk,
+                    cairo,
+                    mtl
   hs-source-dirs:   src
 
 test-suite test-tetrix
