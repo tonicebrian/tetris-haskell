@@ -41,46 +41,32 @@ main = do
     containerAdd frame canvas
     widgetModifyBg canvas StateNormal bluishGray
 
-    -- Events and callbacks
-    window `onDestroy` mainQuit
 
     -- Show and run
     widgetShowAll window
 
     drawin <- widgetGetDrawWindow canvas
 
-    -- TODO. Functions onXXX are deprecated see what is the proper way to do
-    -- this using the pattern window `on` keyPressedEvent (exposeEvent)
-    onExpose canvas $ \_ -> do 
-                                st <- readMVar ui
-                                putStrLn st
-                                myPaint st drawin
-
-
-    --window `on` keyPressEvent $ hKeyPress ui >>= liftIO . putStrLn . eventTime >> return True
-    onKeyPress window $ \_ -> hKeyPress ui >> return True
+    -- Events and callbacks
+    window `on` destroyEvent $ liftIO mainQuit >> return False
+    canvas `on` exposeEvent $ tryEvent (exposeHandler ui drawin)
+    window `on` keyPressEvent $ tryEvent (keyPressHandler ui canvas)
 
     mainGUI
     
 
-keyPressHandler ui drawin = do
-    hKeyPress ui
-
-renderScene ui drawin = do 
-    st <- readMVar ui
-    putStrLn st
-    myPaint st drawin
+exposeHandler :: MVar ViewState -> DrawWindow ->  EventM EExpose ()
+exposeHandler ui drawin = do
+    st <- liftIO $ readMVar ui
+    liftIO $ myPaint st drawin
 
  
-myPaint :: DrawableClass a => ViewState -> a -> IO Bool
-myPaint st drawin = renderWithDrawable drawin (do
-                                                   myDraw st
-                                                   return True
-                                                )
+myPaint :: DrawableClass a => ViewState -> a -> IO ()
+myPaint st drawin = renderWithDrawable drawin (myDraw st)
 
 -- Handles all the keyboard interactions
-hKeyPress :: MVar ViewState -> EventM EKey ()
-hKeyPress mvs = do
+keyPressHandler :: WidgetClass a => MVar ViewState -> a -> EventM EKey ()
+keyPressHandler mvs drawin = do
    let print = liftIO . putStrLn . keyName 
    key <- eventKeyVal
    case key of
@@ -89,6 +75,8 @@ hKeyPress mvs = do
      65364  -> print key
      65361  -> print key
      65363  -> print key
+   
+   liftIO $ widgetQueueDraw drawin
 
 
 myDraw :: String -> Render()
