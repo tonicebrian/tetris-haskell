@@ -48,7 +48,7 @@ main = do
     drawin <- widgetGetDrawWindow canvas
 
     -- Events and callbacks
-    window `on` destroyEvent $ liftIO mainQuit >> return False
+    window `on` deleteEvent $ tryEvent (liftIO mainQuit) 
     canvas `on` exposeEvent $ tryEvent (exposeHandler ui drawin)
     window `on` keyPressEvent $ tryEvent (keyPressHandler ui canvas)
 
