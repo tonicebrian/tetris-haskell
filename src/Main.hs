@@ -9,29 +9,16 @@ import Control.Concurrent.MVar
 
 import AbstractUI
 
--- Just for reference
--- bluishGrayRGB = 48 99 99
--- bluishSilverRGB = 210 255 255
-
-keySpace = 32 
-keyUp    = 65362
-keyDown  = 65364
-keyLeft  = 65361
-keyRight = 65363
-
-type ViewState = String
-type State = MVar ViewState
-
 main :: IO()
 main = do
     let bluishGray = Color (256*48) (256*99) (256*99)
         bluishSilver = Color (256*210) (256*255) (256*255)
-        
-    initGUI
 
-    ui <- newMVar "left" 
+    -- Model
+    ui <- newMVar "" 
 
     -- GUI components
+    initGUI
     window <- windowNew
     set window [windowTitle := "Tetrix",
                 windowDefaultWidth := 700, windowDefaultHeight := 400]
@@ -41,10 +28,8 @@ main = do
     containerAdd frame canvas
     widgetModifyBg canvas StateNormal bluishGray
 
-
     -- Show and run
     widgetShowAll window
-
     drawin <- widgetGetDrawWindow canvas
 
     -- Events and callbacks
@@ -52,38 +37,39 @@ main = do
     canvas `on` exposeEvent $ tryEvent (exposeHandler ui drawin)
     window `on` keyPressEvent $ tryEvent (keyPressHandler ui canvas)
 
+    -- Main loop
     mainGUI
     
-
-exposeHandler :: MVar ViewState -> DrawWindow ->  EventM EExpose ()
+-- Handlers
+-- Redraw handler 
+exposeHandler :: MVar AbstractUI -> DrawWindow ->  EventM EExpose ()
 exposeHandler ui drawin = do
     st <- liftIO $ readMVar ui
-    liftIO $ myPaint st drawin
-
- 
-myPaint :: DrawableClass a => ViewState -> a -> IO ()
-myPaint st drawin = renderWithDrawable drawin (myDraw st)
+    liftIO $ renderWithDrawable drawin (render st)
 
 -- Handles all the keyboard interactions
-keyPressHandler :: WidgetClass a => MVar ViewState -> a -> EventM EKey ()
+keyPressHandler :: WidgetClass a => MVar AbstractUI -> a -> EventM EKey ()
 keyPressHandler mvs drawin = do
-   let print = liftIO . putStrLn . keyName 
    key <- eventKeyVal
-   case key of
-     32     -> print key
-     65362  -> print key
-     65364  -> print key
-     65361  -> print key
-     65363  -> print key
-   
+   liftIO $ updateModel mvs key
    liftIO $ widgetQueueDraw drawin
 
+-- Changes the Abstract View
+updateModel :: MVar AbstractUI -> KeyVal -> IO ()
+updateModel ui key = do
+   st <- takeMVar ui
+   case key of
+     32    -> liftIO $ putMVar ui (keyName key) -- Space
+     65362 -> liftIO $ putMVar ui (keyName key) -- Up
+     65364 -> liftIO $ putMVar ui (keyName key) -- Down
+     65361 -> liftIO $ putMVar ui (keyName key) -- Left
+     65363 -> liftIO $ putMVar ui (keyName key) -- Right
+     _     -> liftIO $ putMVar ui st
 
-myDraw :: String -> Render()
-myDraw message = do
-    setSourceRGB 0 0 0
-    moveTo 100 100
+render :: String -> Render()
+render message = do
+    setSourceRGB 210 255 255
+    moveTo 10 10
     showText message
     stroke
 
-        
