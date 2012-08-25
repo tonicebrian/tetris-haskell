@@ -1,7 +1,7 @@
 module Main(Main.main) where
 
 import Graphics.UI.Gtk
-import Graphics.UI.Gtk.Gdk.GC
+import Graphics.UI.Gtk.Gdk.GC hiding (fill)
 import Graphics.Rendering.Cairo
 
 import Control.Monad.State as MS
@@ -17,6 +17,12 @@ bluishGray = Color (256*48) (256*99) (256*99)
 bluishSilver = Color (256*210) (256*255) (256*255)
 blockSize = 16
 blockMargin = 1
+
+setBluishLighterGray = setSourceRGB (79/256) (130/256) (130/256)
+setBluishGray = setSourceRGB (48/256) (99/256) (99/256)
+setBluishEvenLighter = setSourceRGB (145/256) (196/256) (196/256)
+setBluishSilver = setSourceRGB (210/256) (255/256) (255/256)
+
  
 main :: IO()
 main = do
@@ -76,21 +82,41 @@ render :: AbstractUI -> Render()
 render ui = do
     let gv = view ui
     drawEmptyGrid gv
-    stroke
+    drawBlocks gv
+
+drawCurrent :: GameView -> Render()
+drawCurrent gv = do
+    setBluishSilver
+    let state = current gv
+    paintBlocks gv state
+
+drawBlocks :: GameView -> Render()
+drawBlocks gv = do
+    setBluishEvenLighter
+    let state = blocks gv
+    paintBlocks gv state
+
+paintBlocks :: GameView -> [Block] -> Render()
+paintBlocks gv bs = do
+    mapM_ (\b -> let (x,y) = pos b
+                 in buildRectangle gv (fromIntegral x) (fromIntegral y)) bs
+    fill
 
 drawEmptyGrid :: GameView -> Render ()
 drawEmptyGrid gv = do
-    setSourceRGB 79 130 130
+    setBluishLighterGray   
     setLineWidth 1
     let coords = [(fromIntegral x, fromIntegral y) | x <- [0..fst(gridSize gv)], y <- [0..snd(gridSize gv)]]
         recs = map (\(x,y) -> buildRectangle gv x y) coords 
     sequence_ recs
+    stroke
 
 buildRectangle :: GameView -> Double -> Double -> Render()
 buildRectangle gv x y = rectangle x0 y0 width height
     where 
+        (a,b) = gridSize gv
         x0 = x*blockSize
-        y0 = (y+1)*blockSize
+        y0 = (fromIntegral b-y)*blockSize
         width = blockSize
         height = blockSize
 
