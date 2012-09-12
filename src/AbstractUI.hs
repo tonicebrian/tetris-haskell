@@ -1,22 +1,35 @@
 module AbstractUI(
         -- The View
-        AbstractUI(..),
+        AbstractUI,
+
         view,
-        emptyUI
+        left,
+        right,
+        -- Constructors
+        newUI
 ) where
 
 import Core
+import qualified Stage as S
 
-data AbstractUI = AbstractUI
+data AbstractUI = AUI {
+    stage :: S.Stage
+}
 
 -- Static view. Refactor later. TODO
 view :: AbstractUI -> GameView
-view ui = GameView blocks' size' current'
-    where
-        blocks' = [Block (5,5) TKind, Block (6,5) TKind, Block (7,5) TKind, Block (6,6) TKind, Block (0,0) TKind]
-        size'   = (10,20)
-        current' = [Block (5,5) TKind, Block (6,5) TKind, Block (7,5) TKind, Block (6,6) TKind]
+view ui = S.view (stage ui)
 
-emptyUI = AbstractUI
+newUI = AUI (S.mkStage (10,20)) 
+
+left :: AbstractUI -> AbstractUI
+left ui = let old = stage ui
+              new = S.moveLeft old
+          in ui { stage = new }
+
+right :: AbstractUI -> AbstractUI
+right ui = let old = stage ui
+               new = S.moveRight old
+           in ui { stage = new }
 
 

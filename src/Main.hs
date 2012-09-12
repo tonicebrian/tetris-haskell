@@ -27,7 +27,7 @@ setBluishSilver = setSourceRGB (210/256) (255/256) (255/256)
 main :: IO()
 main = do
     -- Model
-    ui <- newMVar emptyUI
+    ui <- newMVar newUI
 
     -- GUI components
     initGUI
@@ -69,25 +69,28 @@ keyPressHandler mvs drawin = do
 -- Changes the Abstract View
 updateModel :: MVar AbstractUI -> KeyVal -> IO ()
 updateModel ui key = do
-   st <- takeMVar ui
-   case key of
-     32    -> liftIO $ putMVar ui st -- Space
-     65362 -> liftIO $ putMVar ui st -- Up
-     65364 -> liftIO $ putMVar ui st -- Down
-     65361 -> liftIO $ putMVar ui st -- Left
-     65363 -> liftIO $ putMVar ui st -- Right
-     _     -> liftIO $ putMVar ui st
+   oldUI <- takeMVar ui
+   let newUI = case key of
+                32    -> oldUI -- Space
+                65362 -> oldUI -- Up
+                65364 -> oldUI -- Down
+                65361 -> left oldUI -- Left
+                65363 -> right oldUI -- Right
+                _     -> oldUI
+   
+   putMVar ui newUI 
 
 render :: AbstractUI -> Render()
 render ui = do
     let gv = view ui
     drawEmptyGrid gv
     drawBlocks gv
+    drawCurrent gv
 
 drawCurrent :: GameView -> Render()
 drawCurrent gv = do
     setBluishSilver
-    let state = current gv
+    let state = currentGameView gv
     paintBlocks gv state
 
 drawBlocks :: GameView -> Render()
@@ -98,7 +101,7 @@ drawBlocks gv = do
 
 paintBlocks :: GameView -> [Block] -> Render()
 paintBlocks gv bs = do
-    mapM_ (\b -> let (x,y) = pos b
+    mapM_ (\b -> let (x,y) = posBlock b
                  in buildRectangle gv (fromIntegral x) (fromIntegral y)) bs
     fill
 
