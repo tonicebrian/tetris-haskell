@@ -77,7 +77,6 @@ updateModel ui key = do
                 65361 -> left oldUI -- Left
                 65363 -> right oldUI -- Right
                 _     -> oldUI
-   
    putMVar ui newUI 
 
 render :: AbstractUI -> Render()
