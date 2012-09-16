@@ -20,7 +20,7 @@ data Stage = Stage {
 mkStage :: (Int,Int) -> Stage
 mkStage s@(a,b) = Stage s cp bs
     where 
-      dPos = (fromIntegral a/2.0,fromIntegral b-1)
+      dPos = (fromIntegral a/2.0,fromIntegral b-3)
       cp = mkPiece dPos TKind
       bs = (Block (0,0) TKind) : (current cp)
 
