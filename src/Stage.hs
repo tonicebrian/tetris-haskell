@@ -38,7 +38,14 @@ stageMoveBy s@(Stage (a,b) cp bs) x y =
     let unloaded = unload cp bs
         moved = moveBy cp (x,y)
         newBlocks = load moved unloaded
-    in s {currentPiece = moved, blocks = newBlocks}
+    in if all (inBounds s) $ map posBlock (current moved) 
+       then s {currentPiece = moved, blocks = newBlocks}
+       else s
+
+inBounds :: Stage -> (Int,Int) -> Bool
+inBounds s (x,y) = (x >= 0) && (x <= a) && (y >= 0) && (y <= b)
+    where
+        (a,b) = size s 
 
 unload :: Piece -> [Block] -> [Block]
 unload p bs = let currentPoss = map posBlock (current p)
