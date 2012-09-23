@@ -21,4 +21,9 @@ spec = do
         it "change the blocks in view" $
             let blks = blocks . view . moveRight $ stage
             in  (sort $ map posBlock blks) == (sort $ [(0, 0),(5, 17), (6, 17), (7, 17), (6, 18)]) 
+
+    describe "Rotating the current piece should" $ do
+        it "change the blocks in the view" $
+            let blks = blocks. view . rotateCW $ stage
+            in (sort $ map posBlock blks) == (sort $ [(0, 0), (5, 18), (5, 17), (5, 16), (6, 17)])
         

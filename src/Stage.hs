@@ -2,6 +2,7 @@ module Stage(
         Stage,
         moveLeft,
         moveRight,
+        rotateCW,
         view,
 
         -- Constructor
@@ -27,11 +28,23 @@ mkStage s@(a,b) = Stage s cp bs
 view :: Stage -> GameView
 view stage = GameView (blocks stage) (size stage) (current (currentPiece stage))
 
+rotateCW :: Stage -> Stage
+rotateCW stage = stageRotateBy stage (-pi/2.0)
+
 moveLeft :: Stage -> Stage
 moveLeft stage = stageMoveBy stage (-1.0) 0.0
 
 moveRight :: Stage -> Stage
 moveRight stage = stageMoveBy stage 1.0 0.0
+
+stageRotateBy :: Stage -> Double -> Stage
+stageRotateBy s@(Stage (a,b) cp bs) theta = 
+    let unloaded = unload cp bs
+        moved = rotateBy cp theta
+        newBlocks = load moved unloaded
+    in if all (inBounds s) $ map posBlock (current moved) 
+       then s {currentPiece = moved, blocks = newBlocks}
+       else s
 
 stageMoveBy :: Stage -> Double -> Double -> Stage
 stageMoveBy s@(Stage (a,b) cp bs) x y = 

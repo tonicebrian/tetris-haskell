@@ -9,7 +9,8 @@ module Core (
         current,
 
         -- Functions
-        moveBy
+        moveBy,
+        rotateBy
         )
 where
 
@@ -49,3 +50,13 @@ current (Piece (a,b) kind locals) =
 
 moveBy :: Piece -> (Double,Double) -> Piece
 moveBy p@(Piece (a,b) _ _) (x,y) = p {posPiece = (a+x,b+y)}
+
+rotateBy :: Piece -> Double -> Piece
+rotateBy p@(Piece (a,b) _ ls) theta = 
+    let c = cos theta
+        s = sin theta
+        roundToHalf :: (Double,Double) -> (Double,Double)
+        roundToHalf (a,b) = ((fromIntegral . round $ a*2.0) * 0.5, (fromIntegral .round $ b*2.0) * 0.5)
+    in p {
+        locals = map roundToHalf $ map (\(x,y) -> (x * c - y * s, x * s + y * c)) ls
+       }
