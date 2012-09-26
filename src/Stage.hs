@@ -4,7 +4,6 @@ module Stage(
         moveRight,
         rotateCW,
         tick,
-        view,
 
         -- Constructor
         mkStage
@@ -26,34 +25,35 @@ mkStage s@(a,b) = Stage s cp bs
       cp = mkPiece dPos TKind
       bs = (Block (0,0) TKind) : (current cp)
 
-view :: Stage -> GameView
-view stage = GameView (blocks stage) (size stage) (current (currentPiece stage))
+--view :: Stage -> GameView
+--view stage = GameView (blocks stage) (size stage) (current (currentPiece stage))
 
-rotateCW :: Stage -> Stage
-rotateCW stage = transformPiece stage $ flip rotateBy (-pi/2.0)
+rotateCW :: GameState -> GameState
+rotateCW = transit $ flip rotateBy (-pi/2.0)
 
-moveLeft :: Stage -> Stage
-moveLeft stage = transformPiece stage $ flip moveBy (-1.0,0.0)
+moveLeft :: GameState -> GameState
+moveLeft = transit $ flip moveBy (-1.0,0.0)
 
-moveRight :: Stage -> Stage
-moveRight stage = transformPiece stage $ flip moveBy (1.0,0.0)
+moveRight :: GameState -> GameState
+moveRight = transit $ flip moveBy (1.0,0.0)
 
 tick :: GameState -> GameState
-tick s = undefined
+tick = undefined
 
-transformPiece :: Stage -> (Piece -> Piece) -> Stage
-transformPiece s@(Stage (a,b) cp bs) trans =
+transit :: (Piece -> Piece) -> (GameState -> GameState)
+transit trans = \gs@(GameState bs (a,b) cp) -> 
     let unloaded = unload cp bs
         moved = trans cp
         newBlocks = load moved unloaded
-    in if all (inBounds s) $ map posBlock (current moved) 
-       then s {currentPiece = moved, blocks = newBlocks}
-       else s
+    in if all (inBounds gs) $ map posBlock (current moved) 
+       then gs {currentPieceGS = moved, blocksGS = newBlocks}
+       else gs
 
-inBounds :: Stage -> (Int,Int) -> Bool
-inBounds s (x,y) = (x >= 0) && (x <= a) && (y >= 0) && (y <= b)
+
+inBounds :: GameState -> (Int,Int) -> Bool
+inBounds gs (x,y) = (x >= 0) && (x <= a) && (y >= 0) && (y <= b)
     where
-        (a,b) = size s 
+        (a,b) = gridSizeGS gs 
 
 unload :: Piece -> [Block] -> [Block]
 unload p bs = let currentPoss = map posBlock (current p)

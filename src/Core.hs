@@ -12,7 +12,8 @@ module Core (
 
         -- Functions
         moveBy,
-        rotateBy
+        rotateBy,
+        viewGS
         )
 where
 
