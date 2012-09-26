@@ -2,6 +2,8 @@ module Stage(
         Stage,
         moveLeft,
         moveRight,
+        rotateCW,
+        tick,
         view,
 
         -- Constructor
@@ -9,7 +11,7 @@ module Stage(
         )
 where
 
-import Core hiding (blocks)
+import Core 
 
 data Stage = Stage {
     size :: (Int,Int),
@@ -27,18 +29,31 @@ mkStage s@(a,b) = Stage s cp bs
 view :: Stage -> GameView
 view stage = GameView (blocks stage) (size stage) (current (currentPiece stage))
 
+rotateCW :: Stage -> Stage
+rotateCW stage = transformPiece stage $ flip rotateBy (-pi/2.0)
+
 moveLeft :: Stage -> Stage
-moveLeft stage = stageMoveBy stage (-1.0) 0.0
+moveLeft stage = transformPiece stage $ flip moveBy (-1.0,0.0)
 
 moveRight :: Stage -> Stage
-moveRight stage = stageMoveBy stage 1.0 0.0
+moveRight stage = transformPiece stage $ flip moveBy (1.0,0.0)
 
-stageMoveBy :: Stage -> Double -> Double -> Stage
-stageMoveBy s@(Stage (a,b) cp bs) x y = 
+tick :: GameState -> GameState
+tick s = undefined
+
+transformPiece :: Stage -> (Piece -> Piece) -> Stage
+transformPiece s@(Stage (a,b) cp bs) trans =
     let unloaded = unload cp bs
-        moved = moveBy cp (x,y)
+        moved = trans cp
         newBlocks = load moved unloaded
-    in s {currentPiece = moved, blocks = newBlocks}
+    in if all (inBounds s) $ map posBlock (current moved) 
+       then s {currentPiece = moved, blocks = newBlocks}
+       else s
+
+inBounds :: Stage -> (Int,Int) -> Bool
+inBounds s (x,y) = (x >= 0) && (x <= a) && (y >= 0) && (y <= b)
+    where
+        (a,b) = size s 
 
 unload :: Piece -> [Block] -> [Block]
 unload p bs = let currentPoss = map posBlock (current p)
