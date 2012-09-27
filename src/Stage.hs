@@ -11,6 +11,8 @@ module Stage(
 where
 
 import Core 
+import Data.List
+import Data.Maybe
 
 data Stage = Stage {
     size :: (Int,Int),
@@ -24,9 +26,6 @@ mkStage s@(a,b) = Stage s cp bs
       dPos = (fromIntegral a/2.0,fromIntegral b-3)
       cp = mkPiece dPos TKind
       bs = (Block (0,0) TKind) : (current cp)
-
---view :: Stage -> GameView
---view stage = GameView (blocks stage) (size stage) (current (currentPiece stage))
 
 rotateCW :: GameState -> GameState
 rotateCW = transit $ flip rotateBy (-pi/2.0)
@@ -45,8 +44,10 @@ transit trans = \gs@(GameState bs (a,b) cp) ->
     let unloaded = unload cp bs
         moved = trans cp
         newBlocks = load moved unloaded
-    in if all (inBounds gs) $ map posBlock (current moved) 
-       then gs {currentPieceGS = moved, blocksGS = newBlocks}
+        currentPoss = map posBlock $ current moved
+    in if and [all (inBounds gs) currentPoss,
+               (map posBlock unloaded `intersect` currentPoss) == [] ]
+       then gs { blocksGS = newBlocks, currentPieceGS = moved }
        else gs
 
 
