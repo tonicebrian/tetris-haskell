@@ -6,6 +6,7 @@ import Graphics.Rendering.Cairo
 
 import Control.Monad.State as MS
 import Control.Concurrent.MVar
+import Control.Concurrent
 
 import Debug.Trace
 
@@ -29,6 +30,9 @@ main = do
     -- Model
     ui <- newMVar newUI
 
+    -- Every so often, we try to run other threads.
+    timeoutAddFull (yield >> return True) priorityDefaultIdle 100
+
     -- GUI components
     initGUI
     window <- windowNew
@@ -44,6 +48,9 @@ main = do
     widgetShowAll window
     drawin <- widgetGetDrawWindow canvas
 
+    -- Create the lightweight thread that controls ticking
+    forkIO (tickUI ui canvas)
+
     -- Events and callbacks
     window `on` deleteEvent $ tryEvent (liftIO mainQuit) 
     canvas `on` exposeEvent $ tryEvent (exposeHandler ui drawin)
@@ -51,7 +58,17 @@ main = do
 
     -- Main loop
     mainGUI
-    
+
+
+-- Ticking functions
+tickUI :: MVar AbstractUI -> DrawingArea -> IO()
+tickUI ui canvas = do
+    threadDelay 1000000
+    aui <- takeMVar ui
+    putMVar ui (tick aui)
+    postGUIAsync $ widgetQueueDraw canvas
+    tickUI ui canvas
+
 -- Handlers
 -- Redraw handler 
 exposeHandler :: MVar AbstractUI -> DrawWindow ->  EventM EExpose ()
@@ -95,7 +112,7 @@ drawCurrent gv = do
 drawBlocks :: GameView -> Render()
 drawBlocks gv = do
     setBluishEvenLighter
-    let state = blocks gv
+    let state = blocksGV gv
     paintBlocks gv state
 
 paintBlocks :: GameView -> [Block] -> Render()
@@ -108,7 +125,7 @@ drawEmptyGrid :: GameView -> Render ()
 drawEmptyGrid gv = do
     setBluishLighterGray   
     setLineWidth 1
-    let coords = [(fromIntegral x, fromIntegral y) | x <- [0..fst(gridSize gv)], y <- [0..snd(gridSize gv)]]
+    let coords = [(fromIntegral x, fromIntegral y) | x <- [0..fst(gridSizeGV gv)], y <- [0..snd(gridSizeGV gv)]]
         recs = map (\(x,y) -> buildRectangle gv x y) coords 
     sequence_ recs
     stroke
@@ -116,7 +133,7 @@ drawEmptyGrid gv = do
 buildRectangle :: GameView -> Double -> Double -> Render()
 buildRectangle gv x y = rectangle x0 y0 width height
     where 
-        (a,b) = gridSize gv
+        (a,b) = gridSizeGV gv
         x0 = x*blockSize
         y0 = (fromIntegral b-y)*blockSize
         width = blockSize

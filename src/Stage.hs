@@ -3,14 +3,16 @@ module Stage(
         moveLeft,
         moveRight,
         rotateCW,
-        view,
+        tick,
 
         -- Constructor
         mkStage
         )
 where
 
-import Core hiding (blocks)
+import Core 
+import Data.List
+import Data.Maybe
 
 data Stage = Stage {
     size :: (Int,Int),
@@ -25,40 +27,39 @@ mkStage s@(a,b) = Stage s cp bs
       cp = mkPiece dPos TKind
       bs = (Block (0,0) TKind) : (current cp)
 
-view :: Stage -> GameView
-view stage = GameView (blocks stage) (size stage) (current (currentPiece stage))
+rotateCW :: GameState -> GameState
+rotateCW = transit id $ flip rotateBy (-pi/2.0)
 
-rotateCW :: Stage -> Stage
-rotateCW stage = stageRotateBy stage (-pi/2.0)
+moveLeft :: GameState -> GameState
+moveLeft = transit id $ flip moveBy (-1.0,0.0)
 
-moveLeft :: Stage -> Stage
-moveLeft stage = stageMoveBy stage (-1.0) 0.0
+moveRight :: GameState -> GameState
+moveRight = transit id $ flip moveBy (1.0,0.0)
 
-moveRight :: Stage -> Stage
-moveRight stage = stageMoveBy stage 1.0 0.0
+tick :: GameState -> GameState
+tick = transit spawn $ flip moveBy (0.0, -1.0)
 
-stageRotateBy :: Stage -> Double -> Stage
-stageRotateBy s@(Stage (a,b) cp bs) theta = 
+spawn :: GameState -> GameState
+spawn gs@(GameState bs (a,b) cp) = 
+    let p = mkPiece (dropOffPos a b) TKind
+    in GameState (bs++(current p)) (a,b) p
+
+transit :: (GameState -> GameState) -> (Piece -> Piece) -> (GameState -> GameState)
+transit onFail trans = \gs@(GameState bs (a,b) cp) -> 
     let unloaded = unload cp bs
-        moved = rotateBy cp theta
+        moved = trans cp
         newBlocks = load moved unloaded
-    in if all (inBounds s) $ map posBlock (current moved) 
-       then s {currentPiece = moved, blocks = newBlocks}
-       else s
+        currentPoss = map posBlock $ current moved
+    in if and [all (inBounds gs) currentPoss,
+               (map posBlock unloaded `intersect` currentPoss) == [] ]
+       then gs { blocksGS = newBlocks, currentPieceGS = moved }
+       else onFail gs
 
-stageMoveBy :: Stage -> Double -> Double -> Stage
-stageMoveBy s@(Stage (a,b) cp bs) x y = 
-    let unloaded = unload cp bs
-        moved = moveBy cp (x,y)
-        newBlocks = load moved unloaded
-    in if all (inBounds s) $ map posBlock (current moved) 
-       then s {currentPiece = moved, blocks = newBlocks}
-       else s
 
-inBounds :: Stage -> (Int,Int) -> Bool
-inBounds s (x,y) = (x >= 0) && (x <= a) && (y >= 0) && (y <= b)
+inBounds :: GameState -> (Int,Int) -> Bool
+inBounds gs (x,y) = (x >= 0) && (x <= a) && (y >= 0) && (y <= b)
     where
-        (a,b) = size s 
+        (a,b) = gridSizeGS gs 
 
 unload :: Piece -> [Block] -> [Block]
 unload p bs = let currentPoss = map posBlock (current p)

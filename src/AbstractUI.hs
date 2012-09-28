@@ -5,6 +5,7 @@ module AbstractUI(
         view,
         left,
         right,
+        tick,
         -- Constructors
         newUI
 ) where
@@ -13,23 +14,26 @@ import Core
 import qualified Stage as S
 
 data AbstractUI = AUI {
-    stage :: S.Stage
+    state :: GameState
 }
 
 -- Static view. Refactor later. TODO
 view :: AbstractUI -> GameView
-view ui = S.view (stage ui)
+view ui = viewGS (state ui)
 
-newUI = AUI (S.mkStage (10,20)) 
+newUI = AUI (mkState [Block (0,0) TKind]) 
 
 left :: AbstractUI -> AbstractUI
-left ui = let old = stage ui
+left ui = let old = state ui
               new = S.moveLeft old
-          in ui { stage = new }
+          in ui { state = new }
 
 right :: AbstractUI -> AbstractUI
-right ui = let old = stage ui
+right ui = let old = state ui
                new = S.moveRight old
-           in ui { stage = new }
+           in ui { state = new }
+
+tick :: AbstractUI -> AbstractUI
+tick ui@(AUI old) = ui { state = S.tick old }
 
 

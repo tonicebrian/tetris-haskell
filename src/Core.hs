@@ -2,15 +2,19 @@ module Core (
         PieceKind(..),
         Block(..),
         GameView(..),
+        GameState(..),
         Piece,
 
         -- Constructors
         mkPiece,
         current,
+        mkState,
 
         -- Functions
         moveBy,
-        rotateBy
+        rotateBy,
+        viewGS,
+        dropOffPos
         )
 where
 
@@ -28,12 +32,28 @@ data Block = Block {
     kindBlock :: PieceKind
 } deriving Eq
 
-data GameView = GameView {
-    blocks :: [Block],
-    gridSize :: (Int,Int),
-    currentGameView :: [Block]
+data GameState = GameState {
+    blocksGS :: [Block],
+    gridSizeGS :: (Int,Int),
+    currentPieceGS :: Piece
 }
 
+dropOffPos :: Int -> Int -> (Double,Double)
+dropOffPos x y = (fromIntegral x/2.0,fromIntegral y-3.0)
+
+mkState :: [Block] -> GameState
+mkState bs = let (x,y) = (10,20) :: (Int,Int)
+                 p = mkPiece (dropOffPos x y) TKind
+            in GameState (bs++(current p)) (x,y) p
+
+viewGS :: GameState -> GameView
+viewGS (GameState bs size p) = GameView bs size (current p)
+
+data GameView = GameView {
+    blocksGV :: [Block],
+    gridSizeGV :: (Int,Int),
+    currentGameView :: [Block]
+}
 data Piece = Piece {
     posPiece :: (Double,Double),
     kindPiece :: PieceKind,
