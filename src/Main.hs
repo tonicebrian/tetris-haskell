@@ -6,6 +6,7 @@ import Graphics.Rendering.Cairo
 
 import Control.Monad.State as MS
 import Control.Concurrent.MVar
+import Control.Concurrent
 
 import Debug.Trace
 
@@ -29,6 +30,9 @@ main = do
     -- Model
     ui <- newMVar newUI
 
+    -- Every so often, we try to run other threads.
+    timeoutAddFull (yield >> return True) priorityDefaultIdle 100
+
     -- GUI components
     initGUI
     window <- windowNew
@@ -44,6 +48,9 @@ main = do
     widgetShowAll window
     drawin <- widgetGetDrawWindow canvas
 
+    -- Create the lightweight thread that controls ticking
+    forkIO (tickUI ui canvas)
+
     -- Events and callbacks
     window `on` deleteEvent $ tryEvent (liftIO mainQuit) 
     canvas `on` exposeEvent $ tryEvent (exposeHandler ui drawin)
@@ -51,7 +58,17 @@ main = do
 
     -- Main loop
     mainGUI
-    
+
+
+-- Ticking functions
+tickUI :: MVar AbstractUI -> DrawingArea -> IO()
+tickUI ui canvas = do
+    threadDelay 1000000
+    aui <- takeMVar ui
+    putMVar ui (tick aui)
+    widgetQueueDraw canvas
+    tickUI ui canvas
+
 -- Handlers
 -- Redraw handler 
 exposeHandler :: MVar AbstractUI -> DrawWindow ->  EventM EExpose ()

@@ -13,7 +13,8 @@ module Core (
         -- Functions
         moveBy,
         rotateBy,
-        viewGS
+        viewGS,
+        dropOffPos
         )
 where
 
@@ -37,10 +38,12 @@ data GameState = GameState {
     currentPieceGS :: Piece
 }
 
+dropOffPos :: Int -> Int -> (Double,Double)
+dropOffPos x y = (fromIntegral x/2.0,fromIntegral y-3.0)
+
 mkState :: [Block] -> GameState
 mkState bs = let (x,y) = (10,20) :: (Int,Int)
-                 dropOffPos = (fromIntegral x/2.0,fromIntegral y-3.0)
-                 p = mkPiece dropOffPos TKind
+                 p = mkPiece (dropOffPos x y) TKind
             in GameState (bs++(current p)) (x,y) p
 
 viewGS :: GameState -> GameView

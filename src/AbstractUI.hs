@@ -5,6 +5,7 @@ module AbstractUI(
         view,
         left,
         right,
+        tick,
         -- Constructors
         newUI
 ) where
@@ -31,5 +32,8 @@ right :: AbstractUI -> AbstractUI
 right ui = let old = state ui
                new = S.moveRight old
            in ui { state = new }
+
+tick :: AbstractUI -> AbstractUI
+tick ui@(AUI old) = ui { state = S.tick old }
 
 
