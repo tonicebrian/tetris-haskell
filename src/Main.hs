@@ -66,7 +66,7 @@ tickUI ui canvas = do
     threadDelay 1000000
     aui <- takeMVar ui
     putMVar ui (tick aui)
-    widgetQueueDraw canvas
+    postGUIAsync $ widgetQueueDraw canvas
     tickUI ui canvas
 
 -- Handlers
