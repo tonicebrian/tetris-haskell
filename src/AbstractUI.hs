@@ -6,6 +6,8 @@ module AbstractUI(
         left,
         right,
         tick,
+        dropPiece,
+        rotateCW,
         -- Constructors
         newUI
 ) where
@@ -41,4 +43,9 @@ right ui = let old = state ui
 tick :: AbstractUI -> AbstractUI
 tick ui@(AUI old) = ui { state = S.tick old }
 
+dropPiece :: AbstractUI -> AbstractUI
+dropPiece ui@(AUI old) = ui { state = S.dropPiece old }
+
+rotateCW :: AbstractUI -> AbstractUI
+rotateCW ui@(AUI old) = ui { state = S.rotateCW old }
 

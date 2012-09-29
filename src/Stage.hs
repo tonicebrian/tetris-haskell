@@ -2,6 +2,7 @@ module Stage(
         moveLeft,
         moveRight,
         rotateCW,
+        dropPiece,
         tick,
         mkState
         )
@@ -18,6 +19,13 @@ mkState bs kinds =
          p = mkPiece (0,0) TKind
          withNext = spawn(GameState [] (x,y) p p kinds)
      in spawn( withNext { blocksGS = bs } )
+
+dropPiece :: GameState -> GameState
+dropPiece s = (tick . ts) s
+    where
+        ts :: GameState -> GameState
+        ts = foldr (.) id (take (snd $ gridSizeGS s) (repeat moveDown))
+        moveDown = transit id $ flip moveBy (0.0,-1.0)
 
 rotateCW :: GameState -> GameState
 rotateCW = transit id $ flip rotateBy (-pi/2.0)

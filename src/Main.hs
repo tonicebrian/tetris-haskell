@@ -90,9 +90,9 @@ updateModel :: MVar AbstractUI -> KeyVal -> IO ()
 updateModel ui key = do
    oldUI <- takeMVar ui
    let newUI = case key of
-                32    -> oldUI -- Space
-                65362 -> oldUI -- Up
-                65364 -> oldUI -- Down
+                32    -> dropPiece oldUI -- Space
+                65362 -> rotateCW oldUI -- Up
+                65364 -> tick oldUI -- Down
                 65361 -> left oldUI -- Left
                 65363 -> right oldUI -- Right
                 _     -> oldUI

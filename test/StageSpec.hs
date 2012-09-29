@@ -33,6 +33,9 @@ spec = do
     describe "The current piece should" $ do
         it "be initialized to the first element in the state" init1
 
+    describe "Dropping the current piece should" $ do
+        it "tick the piece until it hits something" drop1
+
 left1 = let blks = blocksGS . moveLeft $ s1
         in  (sort $ map posBlock blks) `shouldBe` (sort $ [(0, 0), (3, 17), (4, 17), (5, 17), (4, 18)])
 
@@ -63,3 +66,6 @@ init1 = let k = (kindPiece . currentPieceGS) s4
             blks = map posBlock $ (blocksGS . moveLeft) s4
         in do (k `shouldBe` OKind) 
               (sort blks `shouldBe` sort [(3, 17), (4, 17), (3, 16), (4, 16)])
+
+drop1 = let blks = map posBlock $ (blocksGS . dropPiece) s1
+        in sort blks `shouldBe` sort [(0,0),(4,0),(5,0),(6,0),(5,1),(4,18),(5,18),(6,18),(5,19)]
