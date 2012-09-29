@@ -8,7 +8,7 @@ import Control.Monad.State as MS
 import Control.Concurrent.MVar
 import Control.Concurrent
 
-import Debug.Trace
+import System.Random
 
 import AbstractUI
 import Core
@@ -29,7 +29,8 @@ setBluishSilver = setSourceRGB (210/256) (255/256) (255/256)
 main :: IO()
 main = do
     -- Model
-    ui <- newMVar newUI
+    seed <- getStdGen 
+    ui <- newMVar (newUI seed)
 
     -- Every so often, we try to run other threads.
     timeoutAddFull (yield >> return True) priorityDefaultIdle 100

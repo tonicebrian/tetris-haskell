@@ -10,6 +10,7 @@ ttt = [TKind,TKind,TKind]
 s1 = mkState [Block (0,0) TKind] ttt
 s2 = mkState [Block (3,17) TKind] ttt 
 s3 = mkState (map (\x -> Block x TKind) $ [(0, 0), (1, 0), (2, 0), (3, 0), (7, 0), (8, 0), (9, 0)]) ttt
+s4 = mkState [] [OKind,OKind]
 
 spec = do
     describe "Moving to the left the current piece should" $ do
@@ -58,4 +59,7 @@ tick3 = let moves = foldr (.) id (take 18 $ repeat tick)
             blks = map posBlock $ blocksGS $ moves s3
         in sort blks `shouldBe`sort [(5, 0), (4, 17), (5, 17), (6, 17), (5, 18)]
 
-init1 = False
+init1 = let k = (kindPiece . currentPieceGS) s4
+            blks = map posBlock $ (blocksGS . moveLeft) s4
+        in do (k `shouldBe` OKind) 
+              (sort blks `shouldBe` sort [(3, 17), (4, 17), (3, 16), (4, 16)])

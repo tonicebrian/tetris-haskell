@@ -15,7 +15,8 @@ executable tetrix
                     containers >= 0.4,
                     gtk,
                     cairo,
-                    mtl
+                    mtl,
+                    random
   hs-source-dirs:   src
 
 test-suite test-tetrix

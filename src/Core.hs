@@ -1,7 +1,7 @@
 module Core (
         PieceKind(..),
         Block(..),
-        Piece(posPiece),
+        Piece(..),
 
         -- Constructors
         mkPiece,
