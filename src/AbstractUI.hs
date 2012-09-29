@@ -22,7 +22,7 @@ data AbstractUI = AUI {
 view :: AbstractUI -> GameView
 view ui = viewGS (state ui)
 
-newUI = AUI (mkState [Block (0,0) TKind]) 
+newUI = AUI (S.mkState [Block (0,0) TKind] []) 
 
 left :: AbstractUI -> AbstractUI
 left ui = let old = state ui

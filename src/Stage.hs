@@ -3,6 +3,7 @@ module Stage(
         moveRight,
         rotateCW,
         tick,
+        mkState
         )
 where
 
@@ -10,6 +11,13 @@ import Core
 import Core.Game
 import Data.List
 import Data.Maybe
+
+mkState :: [Block] -> [PieceKind] -> GameState
+mkState bs kinds =
+     let (x,y) = (10,20) :: (Int,Int)
+         p = mkPiece (0,0) TKind
+         withNext = spawn(GameState [] (x,y) p p kinds)
+     in spawn( withNext { blocksGS = bs } )
 
 rotateCW :: GameState -> GameState
 rotateCW = transit id $ flip rotateBy (-pi/2.0)
@@ -24,15 +32,16 @@ tick :: GameState -> GameState
 tick = transit (spawn . clearFullRow)  $ flip moveBy (0.0, -1.0)
 
 spawn :: GameState -> GameState
-spawn gs@(GameState bs (a,b) cp) = 
-    let p = mkPiece (dropOffPos a b) TKind
-    in GameState (bs++(current p)) (a,b) p
+spawn gs@(GameState bs (a,b) p np ks) = 
+    let next = mkPiece (2,1) (head ks)
+        p = np { posPiece = (dropOffPos a b) }
+    in GameState (bs++(current p)) (a,b) p next (tail ks)
 
 clearFullRow :: GameState -> GameState
-clearFullRow gs@(GameState bs (a,b) cp) = tryRow (b-1) gs
+clearFullRow gs@(GameState bs (a,b) cp _ _) = tryRow (b-1) gs
     where
         tryRow :: Int -> GameState -> GameState 
-        tryRow i s@(GameState bs (a,b) cp)
+        tryRow i s@(GameState bs (a,b) cp _ _)
             | i<0 = s
             | otherwise = 
                 let blocksBelow = filter (\x -> (snd $ posBlock x) < i) bs
@@ -44,11 +53,11 @@ clearFullRow gs@(GameState bs (a,b) cp) = tryRow (b-1) gs
                    else tryRow (i-1) s
 
 isFullRow :: Int -> GameState -> Bool
-isFullRow i s@(GameState bs (a,b) cp) =
+isFullRow i s@(GameState bs (a,b) cp _ _) =
     (length $ filter (\x -> (snd $ posBlock x) == i) bs) == a
 
 transit :: (GameState -> GameState) -> (Piece -> Piece) -> (GameState -> GameState)
-transit onFail trans = \gs@(GameState bs (a,b) cp) -> 
+transit onFail trans = \gs@(GameState bs (a,b) cp _ _) -> 
     let unloaded = unload cp bs
         moved = trans cp
         newBlocks = load moved unloaded

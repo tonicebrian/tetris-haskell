@@ -1,7 +1,7 @@
 module Core (
         PieceKind(..),
         Block(..),
-        Piece,
+        Piece(posPiece),
 
         -- Constructors
         mkPiece,
@@ -39,7 +39,12 @@ data Piece = Piece {
 
 mkPiece :: (Double,Double) -> PieceKind -> Piece 
 mkPiece pos TKind = Piece pos TKind [(-1.0, 0.0), (0.0, 0.0), (1.0, 0.0), (0.0, 1.0)] 
-mkPiece _ _ = error "No suitable kind"
+mkPiece pos IKind = Piece pos IKind [(-1.5, 0.0), (-0.5, 0.0), (0.5, 0.0), (1.5, 0.0)]
+mkPiece pos JKind = Piece pos JKind [(-1.0, 0.5), (0.0, 0.5), (1.0, 0.5), (1.0, -0.5)]
+mkPiece pos LKind = Piece pos LKind [(-1.0, 0.5), (0.0, 0.5), (1.0, 0.5), (-1.0, -0.5)]
+mkPiece pos OKind = Piece pos OKind [(-0.5, 0.5), (0.5, 0.5), (-0.5, -0.5), (0.5, -0.5)]
+mkPiece pos SKind = Piece pos SKind [(0.0, 0.5), (1.0, 0.5), (-1.0, -0.5), (0.0, -0.5)]
+mkPiece pos ZKind = Piece pos ZKind [(-1.0, 0.5), (0.0, 0.5), (0.0, -0.5), (1.0, -0.5)]
 
 current :: Piece -> [Block]
 current (Piece (a,b) kind locals) = 
