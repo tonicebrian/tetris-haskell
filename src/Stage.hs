@@ -1,31 +1,14 @@
 module Stage(
-        Stage,
         moveLeft,
         moveRight,
         rotateCW,
         tick,
-
-        -- Constructor
-        mkStage
         )
 where
 
 import Core 
 import Data.List
 import Data.Maybe
-
-data Stage = Stage {
-    size :: (Int,Int),
-    currentPiece :: Piece,
-    blocks :: [Block]
-}
-
-mkStage :: (Int,Int) -> Stage
-mkStage s@(a,b) = Stage s cp bs
-    where 
-      dPos = (fromIntegral a/2.0,fromIntegral b-3)
-      cp = mkPiece dPos TKind
-      bs = (Block (0,0) TKind) : (current cp)
 
 rotateCW :: GameState -> GameState
 rotateCW = transit id $ flip rotateBy (-pi/2.0)

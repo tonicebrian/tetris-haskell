@@ -5,8 +5,6 @@ import Stage
 import Core
 import Data.List
 
-stage = mkStage (10,20) 
-
 s1 = mkState [Block (0,0) TKind]
 s2 = mkState [Block (3,17) TKind]
 s3 = mkState $ map (\x -> Block x TKind) $ [(0, 0), (1, 0), (2, 0), (3, 0), (7, 0), (8, 0), (9, 0)]
