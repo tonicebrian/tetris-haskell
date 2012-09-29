@@ -30,28 +30,28 @@ spec = do
         it "it should also clear out of full rows" tick3
 
 left1 = let blks = blocksGS . moveLeft $ s1
-        in  (sort $ map posBlock blks) == (sort $ [(0, 0), (3, 17), (4, 17), (5, 17), (4, 18)])
+        in  (sort $ map posBlock blks) `shouldBe` (sort $ [(0, 0), (3, 17), (4, 17), (5, 17), (4, 18)])
 
 leftWall1 = let blks = blocksGS . moveLeft . moveLeft. moveLeft. moveLeft . moveLeft $ s1
-            in (sort $ map posBlock blks) == (sort $ [(0, 0), (0, 17), (1, 17), (2, 17), (1, 18)])
+            in (sort $ map posBlock blks) `shouldBe` (sort $ [(0, 0), (0, 17), (1, 17), (2, 17), (1, 18)])
 
 leftHit1 = let blks = blocksGS . moveLeft $ s2
-           in (sort $ map posBlock blks) == (sort $ [(3, 17), (4, 17), (5, 17), (6, 17), (5, 18)]) 
+           in (sort $ map posBlock blks) `shouldBe` (sort $ [(3, 17), (4, 17), (5, 17), (6, 17), (5, 18)]) 
 
 right1 = let blks = blocksGV . viewGS . moveRight $ s1
-         in  (sort $ map posBlock blks) == (sort $ [(0, 0),(5, 17), (6, 17), (7, 17), (6, 18)]) 
+         in  (sort $ map posBlock blks) `shouldBe` (sort $ [(0, 0),(5, 17), (6, 17), (7, 17), (6, 18)]) 
  
 rotate1 = let blks = blocksGV . viewGS . rotateCW $ s1
-          in (sort $ map posBlock blks) == (sort $ [(0, 0), (5, 18), (5, 17), (5, 16), (6, 17)])
+          in (sort $ map posBlock blks) `shouldBe` (sort $ [(0, 0), (5, 18), (5, 17), (5, 16), (6, 17)])
 
 tick1 = let blks = blocksGS $ tick s1
-        in (sort $ map posBlock blks) == (sort $ [(0, 0), (4, 16), (5, 16), (6, 16), (5, 17)])
+        in (sort $ map posBlock blks) `shouldBe` (sort $ [(0, 0), (4, 16), (5, 16), (6, 16), (5, 17)])
 
 tick2 = let moves = foldr (.) id (take 18 $ repeat tick)
             blks = map posBlock $ blocksGS $ moves s1
-        in sort blks == sort [(0, 0), (4, 0), (5, 0), (6, 0), (5, 1), (4, 17), (5, 17), (6, 17), (5, 18)]
+        in sort blks `shouldBe` sort [(0, 0), (4, 0), (5, 0), (6, 0), (5, 1), (4, 17), (5, 17), (6, 17), (5, 18)]
 
 tick3 = let moves = foldr (.) id (take 18 $ repeat tick)
             blks = map posBlock $ blocksGS $ moves s3
-        in sort blks == sort [(0, 0), (4, 0), (5, 0), (6, 0), (5, 1), (4, 17), (5, 17), (6, 17), (5, 18)]
+        in sort blks `shouldBe`sort [(5, 0), (4, 17), (5, 17), (6, 17), (5, 18)]
 

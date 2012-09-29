@@ -25,18 +25,18 @@ data PieceKind = IKind
                 | SKind
                 | TKind
                 | ZKind
-                deriving Eq
+                deriving (Eq,Show)
 
 data Block = Block {
     posBlock :: (Int,Int),
     kindBlock :: PieceKind
-} deriving Eq
+} deriving (Eq,Show)
 
 data GameState = GameState {
     blocksGS :: [Block],
     gridSizeGS :: (Int,Int),
     currentPieceGS :: Piece
-}
+} deriving Show
 
 dropOffPos :: Int -> Int -> (Double,Double)
 dropOffPos x y = (fromIntegral x/2.0,fromIntegral y-3.0)
@@ -58,7 +58,7 @@ data Piece = Piece {
     posPiece :: (Double,Double),
     kindPiece :: PieceKind,
     locals :: [(Double,Double)]
-}
+} deriving Show
 
 mkPiece :: (Double,Double) -> PieceKind -> Piece 
 mkPiece pos TKind = Piece pos TKind [(-1.0, 0.0), (0.0, 0.0), (1.0, 0.0), (0.0, 1.0)] 
