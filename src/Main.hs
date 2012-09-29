@@ -106,7 +106,7 @@ render ui = do
 drawCurrent :: GameView -> Render()
 drawCurrent gv = do
     setBluishSilver
-    let state = currentGameView gv
+    let state = currentGV gv
     paintBlocks gv state
 
 drawBlocks :: GameView -> Render()

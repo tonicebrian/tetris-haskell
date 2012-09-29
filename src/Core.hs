@@ -52,7 +52,7 @@ viewGS (GameState bs size p) = GameView bs size (current p)
 data GameView = GameView {
     blocksGV :: [Block],
     gridSizeGV :: (Int,Int),
-    currentGameView :: [Block]
+    currentGV :: [Block]
 }
 data Piece = Piece {
     posPiece :: (Double,Double),
