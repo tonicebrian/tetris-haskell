@@ -7,6 +7,7 @@ module Stage(
 where
 
 import Core 
+import Core.Game
 import Data.List
 import Data.Maybe
 

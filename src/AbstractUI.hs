@@ -11,6 +11,7 @@ module AbstractUI(
 ) where
 
 import Core
+import Core.Game
 import qualified Stage as S
 
 data AbstractUI = AUI {

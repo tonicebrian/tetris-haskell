@@ -3,6 +3,7 @@ module StageSpec where
 import Test.Hspec
 import Stage
 import Core
+import Core.Game
 import Data.List
 
 s1 = mkState [Block (0,0) TKind]

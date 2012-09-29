@@ -12,6 +12,7 @@ import Debug.Trace
 
 import AbstractUI
 import Core
+import Core.Game
 
 -- Constants
 bluishGray = Color (256*48) (256*99) (256*99)
