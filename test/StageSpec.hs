@@ -7,7 +7,7 @@ import Core.Game
 import Data.List
 
 ttt = [TKind,TKind,TKind]
-s1 = mkState [Block (0,0) TKind] ttt
+s1 = mkState [Block (0,0) TKind] (repeat TKind)
 s2 = mkState [Block (3,17) TKind] ttt 
 s3 = mkState (map (\x -> Block x TKind) $ [(0, 0), (1, 0), (2, 0), (3, 0), (7, 0), (8, 0), (9, 0)]) ttt
 s4 = mkState [] [OKind,OKind]
@@ -35,6 +35,10 @@ spec = do
 
     describe "Dropping the current piece should" $ do
         it "tick the piece until it hits something" drop1
+
+    -- Bug
+    describe "An incomplete line should not" $ do
+        it "disappear" disappear1
 
 left1 = let blks = blocksGS . moveLeft $ s1
         in  (sort $ map posBlock blks) `shouldBe` (sort $ [(0, 0), (3, 17), (4, 17), (5, 17), (4, 18)])
@@ -69,3 +73,7 @@ init1 = let k = (kindPiece . currentPieceGS) s4
 
 drop1 = let blks = map posBlock $ (blocksGS . dropPiece) s1
         in sort blks `shouldBe` sort [(0,0),(4,0),(5,0),(6,0),(5,1),(4,17),(5,17),(6,17),(5,18)]
+
+disappear1 = let blks = map posBlock $ (blocksGS . dropPiece . moveLeft . moveLeft . moveLeft . dropPiece . dropPiece . moveRight . moveRight . moveRight ) s1
+             in (length . nub . map (snd)) blks `shouldBe` 4 -- Two lines and the spawned figure
+
