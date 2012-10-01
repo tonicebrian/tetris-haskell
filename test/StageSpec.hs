@@ -68,4 +68,4 @@ init1 = let k = (kindPiece . currentPieceGS) s4
               (sort blks `shouldBe` sort [(3, 17), (4, 17), (3, 16), (4, 16)])
 
 drop1 = let blks = map posBlock $ (blocksGS . dropPiece) s1
-        in sort blks `shouldBe` sort [(0,0),(4,0),(5,0),(6,0),(5,1),(4,18),(5,18),(6,18),(5,19)]
+        in sort blks `shouldBe` sort [(0,0),(4,0),(5,0),(6,0),(5,1),(4,17),(5,17),(6,17),(5,18)]
