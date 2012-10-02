@@ -127,7 +127,8 @@ drawEmptyGrid :: GameView -> Render ()
 drawEmptyGrid gv = do
     setBluishLighterGray   
     setLineWidth 1
-    let coords = [(fromIntegral x, fromIntegral y) | x <- [0..fst(gridSizeGV gv)], y <- [0..snd(gridSizeGV gv)]]
+    let (a,b) = gridSizeGV gv
+        coords = [(fromIntegral x, fromIntegral y) | x <- [0..(a-1)], y <- [0..(b-1)]]
         recs = map (\(x,y) -> buildRectangle gv x y) coords 
     sequence_ recs
     stroke

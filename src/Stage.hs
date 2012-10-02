@@ -77,7 +77,7 @@ transit onFail trans = \gs@(GameState bs (a,b) cp _ _) ->
 
 
 inBounds :: GameState -> (Int,Int) -> Bool
-inBounds gs (x,y) = (x >= 0) && (x <= a) && (y >= 0) && (y <= b)
+inBounds gs (x,y) = (x >= 0) && (x < a) && (y >= 0) && (y < b)
     where
         (a,b) = gridSizeGS gs 
 
