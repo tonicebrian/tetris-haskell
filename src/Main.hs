@@ -17,7 +17,7 @@ import Core.Game
 -- Constants
 bluishGray = Color (256*48) (256*99) (256*99)
 bluishSilver = Color (256*210) (256*255) (256*255)
-blockSize = 16
+blockSize = 16 
 blockMargin = 1
 
 setBluishLighterGray = setSourceRGB (79/256) (130/256) (130/256)
@@ -98,47 +98,53 @@ updateModel ui key = do
                 _     -> oldUI
    putMVar ui newUI 
 
+drawBoard :: (Int,Int) -> (Int,Int) -> [Block] -> [Block] -> Render()
+drawBoard (offx,offy) size blks cp = do
+    drawEmptyGrid size
+    drawBlocks size blks
+    drawCurrent size blks
+  where
+        drawCurrent :: (Int,Int) -> [Block] -> Render()
+        drawCurrent tam bs = do
+            setBluishSilver
+            paintBlocks tam bs
+        
+        drawBlocks :: (Int,Int) -> [Block] -> Render()
+        drawBlocks size blks = do
+            setBluishEvenLighter
+            paintBlocks size blks
+        
+        paintBlocks :: (Int,Int) -> [Block] -> Render()
+        paintBlocks (a,b) bs = do
+            mapM_ (\blk -> let (x,y) = posBlock blk
+                           in buildRectangle (a,b) (fromIntegral x) (fromIntegral y)) bs
+            fill
+        
+        drawEmptyGrid :: (Int,Int) -> Render ()
+        drawEmptyGrid (a,b) = do
+            setBluishLighterGray   
+            setLineWidth 1
+            let coords = [(fromIntegral x, fromIntegral y) | x <- [0..(a-1)], y <- [0..(b-1)]]
+                recs = map (\(x,y) -> buildRectangle (a,b) x y) coords 
+            sequence_ recs
+            stroke
+        
+        buildRectangle :: (Int,Int) -> Double -> Double -> Render()
+        buildRectangle (a,b) x y = rectangle x0 y0 width height
+            where 
+                x0 = (x+fromIntegral offx)*blockSize
+                y0 = (fromIntegral (b+offy)-y)*blockSize
+                width = blockSize
+                height = blockSize
+   
+    
 render :: AbstractUI -> Render()
 render ui = do
     let gv = view ui
-    drawEmptyGrid gv
-    drawBlocks gv
-    drawCurrent gv
-
-drawCurrent :: GameView -> Render()
-drawCurrent gv = do
-    setBluishSilver
-    let state = currentGV gv
-    paintBlocks gv state
-
-drawBlocks :: GameView -> Render()
-drawBlocks gv = do
-    setBluishEvenLighter
-    let state = blocksGV gv
-    paintBlocks gv state
-
-paintBlocks :: GameView -> [Block] -> Render()
-paintBlocks gv bs = do
-    mapM_ (\b -> let (x,y) = posBlock b
-                 in buildRectangle gv (fromIntegral x) (fromIntegral y)) bs
-    fill
-
-drawEmptyGrid :: GameView -> Render ()
-drawEmptyGrid gv = do
-    setBluishLighterGray   
-    setLineWidth 1
-    let (a,b) = gridSizeGV gv
-        coords = [(fromIntegral x, fromIntegral y) | x <- [0..(a-1)], y <- [0..(b-1)]]
-        recs = map (\(x,y) -> buildRectangle gv x y) coords 
-    sequence_ recs
-    stroke
-
-buildRectangle :: GameView -> Double -> Double -> Render()
-buildRectangle gv x y = rectangle x0 y0 width height
-    where 
-        (a,b) = gridSizeGV gv
-        x0 = x*blockSize
-        y0 = (fromIntegral b-y)*blockSize
-        width = blockSize
-        height = blockSize
+        size = gridSizeGV gv
+        blks = blocksGV gv
+        cp = currentGV gv
+        next = nextGV gv
+    drawBoard (0,0) size blks cp
+    drawBoard (12,0) (4,4) next []
 

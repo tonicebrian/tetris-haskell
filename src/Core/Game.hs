@@ -25,11 +25,12 @@ instance Show GameState where
             genLine i = concat . intersperse " " $ [Map.findWithDefault "." (x,i) grid | x <- [0..(a-1)]] 
 
 viewGS :: GameState -> GameView
-viewGS (GameState bs size p _ _) = GameView bs size (current p)
+viewGS (GameState bs size p np _) = GameView bs size (current p) (current np)
 
 data GameView = GameView {
     blocksGV :: [Block],
     gridSizeGV :: (Int,Int),
-    currentGV :: [Block]
+    currentGV :: [Block],
+    nextGV :: [Block]
 }
 
