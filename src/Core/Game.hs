@@ -22,7 +22,7 @@ data GameState = GameState {
 
 data GameStatus = Active
                 | GameOver
-                deriving Show
+                deriving (Show,Eq)
 
 instance Show GameState where
     show (GameState bs (a,b) _ np _ _) = concat . intersperse "\n" $[genLine (b-i) | i <- [0..(b-1)]]

@@ -95,4 +95,4 @@ blocksInLine i gs = filter (\(a,b) -> b == i) $ map posBlock $ blocksGS gs
 fullLine = blocksInLine 0 (tick stateAboutToFillLastLine) `shouldBe` blocksInLine 0 stateAboutToFillLastLine
 
 spawn1 = let status = statusGS $ chainMove 10 dropPiece $ s1
-         in True
+         in status `shouldBe` GameOver

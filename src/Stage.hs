@@ -40,10 +40,12 @@ tick :: GameState -> GameState
 tick = transit (spawn . clearFullRow)  $ flip moveBy (0.0, -1.0)
 
 spawn :: GameState -> GameState
-spawn gs@(GameState bs (a,b) p np ks _) = 
+spawn gs@(GameState bs (a,b) p np ks st) = 
     let next = mkPiece (2,1) (head ks)
         p = np { posPiece = (dropOffPos a b) }
-    in GameState (bs++(current p)) (a,b) p next (tail ks) Active
+        s1 = (GameState bs (a,b) p next (tail ks) st)
+        good = validate s1 >>= \s -> Just s { blocksGS = (current p)++bs }
+    in fromMaybe (s1 {blocksGS = (current p)++bs,statusGS = GameOver}) good
 
 clearFullRow :: GameState -> GameState
 clearFullRow gs@(GameState bs (a,b) cp _ _ _) = tryRow (b-1) gs
