@@ -17,7 +17,7 @@ mkState :: [Block] -> [PieceKind] -> GameState
 mkState bs kinds =
      let (x,y) = (10,20) :: (Int,Int)
          p = mkPiece (0,0) TKind
-         withNext = spawn(GameState [] (x,y) p p kinds)
+         withNext = spawn(GameState [] (x,y) p p kinds Active)
      in spawn( withNext { blocksGS = bs } )
 
 dropPiece :: GameState -> GameState
@@ -40,16 +40,16 @@ tick :: GameState -> GameState
 tick = transit (spawn . clearFullRow)  $ flip moveBy (0.0, -1.0)
 
 spawn :: GameState -> GameState
-spawn gs@(GameState bs (a,b) p np ks) = 
+spawn gs@(GameState bs (a,b) p np ks _) = 
     let next = mkPiece (2,1) (head ks)
         p = np { posPiece = (dropOffPos a b) }
-    in GameState (bs++(current p)) (a,b) p next (tail ks)
+    in GameState (bs++(current p)) (a,b) p next (tail ks) Active
 
 clearFullRow :: GameState -> GameState
-clearFullRow gs@(GameState bs (a,b) cp _ _) = tryRow (b-1) gs
+clearFullRow gs@(GameState bs (a,b) cp _ _ _) = tryRow (b-1) gs
     where
         tryRow :: Int -> GameState -> GameState 
-        tryRow i s@(GameState bs (a,b) cp _ _)
+        tryRow i s@(GameState bs (a,b) cp _ _ _)
             | i<0 = s
             | otherwise = 
                 let blocksBelow = filter (\x -> (snd $ posBlock x) < i) bs
@@ -61,25 +61,28 @@ clearFullRow gs@(GameState bs (a,b) cp _ _) = tryRow (b-1) gs
                    else tryRow (i-1) s
 
 isFullRow :: Int -> GameState -> Bool
-isFullRow i s@(GameState bs (a,b) cp _ _) =
+isFullRow i s@(GameState bs (a,b) cp _ _ _) =
     (length $ filter (\x -> (snd $ posBlock x) == i) bs) == a
 
 transit :: (GameState -> GameState) -> (Piece -> Piece) -> (GameState -> GameState)
-transit onFail trans = \gs@(GameState bs (a,b) cp _ _) -> 
+transit onFail trans = \gs@(GameState bs (a,b) cp _ _ _) -> 
     let unloaded = unload cp bs
         moved = trans cp
         newBlocks = load moved unloaded
-        currentPoss = map posBlock $ current moved
-    in if and [all (inBounds gs) currentPoss,
-               (map posBlock unloaded `intersect` currentPoss) == [] ]
-       then gs { blocksGS = newBlocks, currentPieceGS = moved }
-       else onFail gs
+        s1 = validate (gs {blocksGS=unloaded,currentPieceGS=moved}) >>= 
+             \s -> Just s { blocksGS = newBlocks }
+    in fromMaybe (onFail gs) s1
 
-
-inBounds :: GameState -> (Int,Int) -> Bool
-inBounds gs (x,y) = (x >= 0) && (x < a) && (y >= 0) && (y < b)
-    where
-        (a,b) = gridSizeGS gs 
+validate :: GameState -> Maybe GameState
+validate gs@(GameState bs size p np st _)=
+    let currentPoss  = map posBlock $ current p
+    in if and [all (inBounds size) currentPoss,
+               (map posBlock bs `intersect` currentPoss) == [] ]
+       then Just gs
+       else Nothing
+  where
+    inBounds :: (Int,Int) -> (Int,Int) -> Bool
+    inBounds (a,b) (x,y) = (x >= 0) && (x < a) && (y >= 0) && (y < b)
 
 unload :: Piece -> [Block] -> [Block]
 unload p bs = let currentPoss = map posBlock (current p)

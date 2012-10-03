@@ -43,6 +43,13 @@ spec = do
         it "be marked as full" fullLine
         it "disappear" disappear1
 
+    describe "Spawing a new piece should" $ do
+        it "end the game if it hits something" spawn1
+
+-- Compose the same move n times
+chainMove :: Int -> (a -> a) -> (a -> a)
+chainMove n f = foldr (.) id (take n $ repeat f)
+
 left1 = let blks = blocksGS . moveLeft $ s1
         in  (sort $ map posBlock blks) `shouldBe` (sort $ [(0, 0), (3, 17), (4, 17), (5, 17), (4, 18)])
 
@@ -86,3 +93,6 @@ disappear1 = let blks = map posBlock $ (blocksGS . moveLeft . moveLeft . moveLef
 blocksInLine i gs = filter (\(a,b) -> b == i) $ map posBlock $ blocksGS gs
 
 fullLine = blocksInLine 0 (tick stateAboutToFillLastLine) `shouldBe` blocksInLine 0 stateAboutToFillLastLine
+
+spawn1 = let status = statusGS $ chainMove 10 dropPiece $ s1
+         in True

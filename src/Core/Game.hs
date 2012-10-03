@@ -1,6 +1,7 @@
 module Core.Game(
          GameState(..),
          GameView(..),
+         GameStatus(..),
         
          viewGS
         )
@@ -15,22 +16,28 @@ data GameState = GameState {
     gridSizeGS :: (Int,Int),
     currentPieceGS :: Piece,
     nextPieceGS :: Piece,
-    kindsGS :: [PieceKind]
+    kindsGS :: [PieceKind],
+    statusGS :: GameStatus
 } 
 
+data GameStatus = Active
+                | GameOver
+                deriving Show
+
 instance Show GameState where
-    show (GameState bs (a,b) _ np _) = concat . intersperse "\n" $[genLine (b-i) | i <- [0..(b-1)]]
+    show (GameState bs (a,b) _ np _ _) = concat . intersperse "\n" $[genLine (b-i) | i <- [0..(b-1)]]
         where
             grid = Map.fromList $ map ((\p -> (p,"#")).posBlock) bs
             genLine i = concat . intersperse " " $ [Map.findWithDefault "." (x,i) grid | x <- [0..(a-1)]] 
 
 viewGS :: GameState -> GameView
-viewGS (GameState bs size p np _) = GameView bs size (current p) (current np)
+viewGS (GameState bs size p np _ status) = GameView bs size (current p) (current np) status
 
 data GameView = GameView {
     blocksGV :: [Block],
     gridSizeGV :: (Int,Int),
     currentGV :: [Block],
-    nextGV :: [Block]
+    nextGV :: [Block],
+    statusGV :: GameStatus
 }
 
