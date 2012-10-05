@@ -31,14 +31,10 @@ newUI seed = AUI (S.mkState [Block (0,0) TKind] kinds)
         pieces = [IKind,JKind,LKind,OKind,SKind,TKind,ZKind]
 
 left :: AbstractUI -> AbstractUI
-left ui = let old = state ui
-              new = S.moveLeft old
-          in ui { state = new }
+left ui@(AUI old) = ui { state = S.moveLeft old }
 
 right :: AbstractUI -> AbstractUI
-right ui = let old = state ui
-               new = S.moveRight old
-           in ui { state = new }
+right ui@(AUI old) = ui { state = S.moveRight old }
 
 tick :: AbstractUI -> AbstractUI
 tick ui@(AUI old) = ui { state = S.tick old }
