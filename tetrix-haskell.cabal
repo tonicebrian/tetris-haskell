@@ -16,7 +16,8 @@ executable tetrix
                     gtk,
                     cairo,
                     mtl,
-                    random
+                    random,
+                    distributed-process >= 0.4
   hs-source-dirs:   src
 
 test-suite test-tetrix
