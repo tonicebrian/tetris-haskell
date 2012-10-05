@@ -147,4 +147,11 @@ render ui = do
         next = nextGV gv
     drawBoard (0,0) size blks cp
     drawBoard (12,0) (4,4) next []
+    case statusGV gv of
+        GameOver -> do
+            setBluishSilver
+            layout <- createLayout "Game Over!!!"
+            showLayout layout
+        Active -> return ()
+
 

@@ -67,13 +67,16 @@ isFullRow i s@(GameState bs (a,b) cp _ _ _) =
     (length $ filter (\x -> (snd $ posBlock x) == i) bs) == a
 
 transit :: (GameState -> GameState) -> (Piece -> Piece) -> (GameState -> GameState)
-transit onFail trans = \gs@(GameState bs (a,b) cp _ _ _) -> 
-    let unloaded = unload cp bs
-        moved = trans cp
-        newBlocks = load moved unloaded
-        s1 = validate (gs {blocksGS=unloaded,currentPieceGS=moved}) >>= 
-             \s -> Just s { blocksGS = newBlocks }
-    in fromMaybe (onFail gs) s1
+transit onFail trans = \gs@(GameState bs (a,b) cp _ _ st) -> 
+    case st of
+        Active -> 
+            let unloaded = unload cp bs
+                moved = trans cp
+                newBlocks = load moved unloaded
+                s1 = validate (gs {blocksGS=unloaded,currentPieceGS=moved}) >>= 
+                     \s -> Just s { blocksGS = newBlocks }
+            in fromMaybe (onFail gs) s1
+        GameOver -> gs
 
 validate :: GameState -> Maybe GameState
 validate gs@(GameState bs size p np st _)=
