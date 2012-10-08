@@ -1,4 +1,4 @@
 tetrix-haskell
 ==============
 
-Kata about implementing Tetrix in Haskell
+Kata about implementing Tetris in Haskell

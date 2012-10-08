@@ -1,4 +1,4 @@
-Name:               tetrix-haskell
+Name:               tetris-haskell
 Version:            0.1
 Description:        Tetrix implementation using Haskell
 License:            GPL-3
@@ -7,7 +7,7 @@ Author:             Toni Cebrián
 Maintainer:         ancechu@gmail.com
 Build-Type:         Simple
 Cabal-Version:      >=1.8
-executable tetrix
+executable tetris
   main-is:          Main.hs
   ghc-options:      -threaded -rtsopts -O2
   ghc-prof-options: -prof -caf-all -auto-all
@@ -20,7 +20,7 @@ executable tetrix
                     distributed-process >= 0.4
   hs-source-dirs:   src
 
-test-suite test-tetrix
+test-suite test-tetris
     type:           exitcode-stdio-1.0
     main-is:        Spec.hs
     hs-source-dirs: test src
