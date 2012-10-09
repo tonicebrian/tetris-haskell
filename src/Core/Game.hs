@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 module Core.Game(
          GameState(..),
          GameView(..),
@@ -10,6 +11,7 @@ where
 import Core
 import qualified Data.Map as Map
 import Data.List
+import Data.Typeable (Typeable)
 
 data GameState = GameState {
     blocksGS :: [Block],
@@ -18,7 +20,7 @@ data GameState = GameState {
     nextPieceGS :: Piece,
     kindsGS :: [PieceKind],
     statusGS :: GameStatus
-} 
+} deriving (Typeable)
 
 data GameStatus = Active
                 | GameOver

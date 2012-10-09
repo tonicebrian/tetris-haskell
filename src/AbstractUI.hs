@@ -17,7 +17,7 @@ import Core.Game
 import qualified Stage as S
 import System.Random
 
-import Actors
+import Processes
 
 data AbstractUI = AUI {
     state :: GameState
