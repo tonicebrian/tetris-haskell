@@ -12,6 +12,7 @@ import Core
 import qualified Data.Map as Map
 import Data.List
 import Data.Typeable (Typeable)
+import Data.Binary
 
 data GameState = GameState {
     blocksGS :: [Block],
@@ -22,9 +23,36 @@ data GameState = GameState {
     statusGS :: GameStatus
 } deriving (Typeable)
 
+instance Binary GameState where
+    put (GameState bs size cp np ks st) = do
+        put bs
+        put size
+        put cp
+        put np
+        put ks
+        put st
+
+    get = do bs <- get
+             size <- get
+             cp <- get
+             np <- get
+             ks <- get
+             st <- get
+             return (GameState bs size cp np ks st)
+            
 data GameStatus = Active
                 | GameOver
                 deriving (Show,Eq)
+
+instance Binary GameStatus where
+    put Active = put (0::Word8)
+    put GameOver = put (1::Word8)
+
+    get = do
+        t <- get :: Get Word8
+        case t of
+            0 -> return Active
+            1 -> return GameOver
 
 instance Show GameState where
     show (GameState bs (a,b) _ np _ _) = concat . intersperse "\n" $[genLine (b-i) | i <- [0..(b-1)]]

@@ -14,6 +14,8 @@ module Core (
         )
 where
 
+import Data.Binary
+
 data PieceKind = IKind
                 | JKind
                 | LKind
@@ -28,6 +30,35 @@ data Block = Block {
     kindBlock :: PieceKind
 } deriving (Eq,Show)
 
+instance Binary Block where
+    put (Block pos kind) = do
+        put pos
+        put kind
+    
+    get = do
+        pos <- get
+        kind <- get
+        return (Block pos kind)
+
+instance Binary PieceKind where
+    put IKind = put (0::Word8)
+    put JKind = put (1::Word8)
+    put LKind = put (2::Word8)
+    put OKind = put (3::Word8)
+    put SKind = put (4::Word8)
+    put TKind = put (5::Word8)
+    put ZKind = put (6::Word8)
+
+    get = do t <- get :: (Get Word8)
+             case t of
+                0 -> return IKind 
+                1 -> return JKind 
+                2 -> return LKind 
+                3 -> return OKind 
+                4 -> return SKind 
+                5 -> return TKind 
+                6 -> return ZKind 
+
 dropOffPos :: Int -> Int -> (Double,Double)
 dropOffPos x y = (fromIntegral x/2.0,fromIntegral y-3.0)
 
@@ -36,6 +67,18 @@ data Piece = Piece {
     kindPiece :: PieceKind,
     locals :: [(Double,Double)]
 } deriving Show
+
+instance Binary Piece where
+    put (Piece pos kind ls) = do
+        put pos
+        put kind
+        put ls
+
+    get = do
+        pos <- get
+        kind <- get
+        ls <- get
+        return (Piece pos kind ls)
 
 mkPiece :: (Double,Double) -> PieceKind -> Piece 
 mkPiece pos TKind = Piece pos TKind [(-1.0, 0.0), (0.0, 0.0), (1.0, 0.0), (0.0, 1.0)] 
