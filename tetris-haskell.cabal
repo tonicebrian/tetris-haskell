@@ -18,6 +18,7 @@ executable tetris
                     mtl,
                     random,
                     distributed-process >= 0.4,
+                    network-transport-tcp >= 0.3,
                     binary
   hs-source-dirs:   src
 

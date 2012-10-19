@@ -1,6 +1,6 @@
 module AbstractUI(
         -- The View
-        AbstractUI,
+        AbstractUI(AUI,processId),
 
         view,
         left,
@@ -9,7 +9,7 @@ module AbstractUI(
         dropPiece,
         rotateCW,
         -- Constructors
-        newUI
+        mkUI
 ) where
 
 import Core
@@ -18,32 +18,36 @@ import qualified Stage as S
 import System.Random
 
 import Processes
+import Control.Distributed.Process
+import Control.Distributed.Process.Closure
 
 data AbstractUI = AUI {
-    state :: GameState
+    processId :: ProcessId
 }
 
 -- Static view. Refactor later. TODO
-view :: AbstractUI -> GameView
-view ui = viewGS (state ui)
+view :: AbstractUI -> Process GameView
+view ui = undefined
 
-newUI seed = AUI (S.mkState [Block (0,0) TKind] kinds) 
+mkUI :: StdGen -> Process ()
+mkUI seed = stageProcess state
     where
+        state = S.mkState [Block (0,0) TKind] kinds
         kinds = map (pieces !!) (randomRs (0,(length pieces)-1) seed) 
         pieces = [IKind,JKind,LKind,OKind,SKind,TKind,ZKind]
 
-left :: AbstractUI -> AbstractUI
-left ui@(AUI old) = ui { state = S.moveLeft old }
+left :: AbstractUI -> Process()
+left ui@(AUI pid) = send pid MoveLeft
 
-right :: AbstractUI -> AbstractUI
-right ui@(AUI old) = ui { state = S.moveRight old }
+right :: AbstractUI -> Process()
+right ui@(AUI pid) = undefined
 
-tick :: AbstractUI -> AbstractUI
-tick ui@(AUI old) = ui { state = S.tick old }
+tick :: AbstractUI -> Process()
+tick ui@(AUI pid) = undefined
 
-dropPiece :: AbstractUI -> AbstractUI
-dropPiece ui@(AUI old) = ui { state = S.dropPiece old }
+dropPiece :: AbstractUI -> Process()
+dropPiece ui@(AUI pid) = undefined
 
-rotateCW :: AbstractUI -> AbstractUI
-rotateCW ui@(AUI old) = ui { state = S.rotateCW old }
+rotateCW :: AbstractUI -> Process()
+rotateCW ui@(AUI pid) = undefined
 

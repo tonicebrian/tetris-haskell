@@ -8,6 +8,11 @@ import Control.Monad.State as MS
 import Control.Concurrent.MVar
 import Control.Concurrent
 
+import Control.Distributed.Process
+import Control.Distributed.Process.Closure
+import Control.Distributed.Process.Node
+import Network.Transport.TCP
+
 import System.Random
 
 import AbstractUI
@@ -28,9 +33,12 @@ setBluishSilver = setSourceRGB (210/256) (255/256) (255/256)
  
 main :: IO()
 main = do
-    -- Model
+    -- Model and process spawn
     seed <- getStdGen 
-    ui <- newMVar (newUI seed)
+    Right transport <- createTransport "127.0.0.1" "8080" defaultTCPParameters
+    node <- newLocalNode transport initRemoteTable
+    pid <- forkProcess node (mkUI seed)
+    let ui = AUI pid
 
     -- Every so often, we try to run other threads.
     timeoutAddFull (yield >> return True) priorityDefaultIdle 100
@@ -63,40 +71,44 @@ main = do
 
 
 -- Ticking functions
-tickUI :: MVar AbstractUI -> DrawingArea -> IO()
+tickUI :: AbstractUI -> DrawingArea -> IO()
 tickUI ui canvas = do
     threadDelay 1000000
-    aui <- takeMVar ui
-    putMVar ui (tick aui)
+    --TODO runProcess node (tick ui) 
     postGUIAsync $ widgetQueueDraw canvas
     tickUI ui canvas
 
 -- Handlers
 -- Redraw handler 
-exposeHandler :: MVar AbstractUI -> DrawWindow ->  EventM EExpose ()
+exposeHandler :: AbstractUI -> DrawWindow ->  EventM EExpose ()
 exposeHandler ui drawin = do
-    content <- liftIO $ readMVar ui
-    liftIO $ renderWithDrawable drawin (render content)
+    -- TODO
+    --runProcess node (do
+    --                  pid <- getSelfPid
+    --                  send pend 
+    --                 -- Wait until a message is received
+    --                )
+    liftIO $ renderWithDrawable drawin (render undefined) -- TODO
 
 -- Handles all the keyboard interactions
-keyPressHandler :: WidgetClass a => MVar AbstractUI -> a -> EventM EKey ()
-keyPressHandler mvs drawin = do
+keyPressHandler :: WidgetClass a => AbstractUI -> a -> EventM EKey ()
+keyPressHandler ui drawin = do
    key <- eventKeyVal
-   liftIO $ updateModel mvs key
+   liftIO $ updateModel ui key
    liftIO $ widgetQueueDraw drawin
 
 -- Changes the Abstract View
-updateModel :: MVar AbstractUI -> KeyVal -> IO ()
+updateModel :: AbstractUI -> KeyVal -> IO ()
 updateModel ui key = do
-   oldUI <- takeMVar ui
-   let newUI = case key of
-                32    -> dropPiece oldUI -- Space
-                65362 -> rotateCW oldUI -- Up
-                65364 -> tick oldUI -- Down
-                65361 -> left oldUI -- Left
-                65363 -> right oldUI -- Right
-                _     -> oldUI
-   putMVar ui newUI 
+   let p = case key of
+             32    -> dropPiece ui -- Space
+             65362 -> rotateCW ui -- Up
+             65364 -> tick ui -- Down
+             65361 -> left ui -- Left
+             65363 -> right ui -- Right
+       pid = processId ui
+   runProcess (processNodeId pid) p
+   
 
 drawBoard :: (Int,Int) -> (Int,Int) -> [Block] -> [Block] -> Render()
 drawBoard (offx,offy) size blks cp = do
@@ -138,10 +150,9 @@ drawBoard (offx,offy) size blks cp = do
                 height = blockSize
    
     
-render :: AbstractUI -> Render()
-render ui = do
-    let gv = view ui
-        size = gridSizeGV gv
+render :: GameView -> Render()
+render gv = do
+    let size = gridSizeGV gv
         blks = blocksGV gv
         cp = currentGV gv
         next = nextGV gv

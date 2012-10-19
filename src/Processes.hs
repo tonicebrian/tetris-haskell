@@ -37,10 +37,17 @@ instance Binary StageMessage where
 
 stageProcess :: GameState -> Process ()
 stageProcess gs = do
-    ngs <- receiveWait [match processMove]
+    ngs <- receiveWait [match processMove
+                        -- , match serveView
+                       ]
     stageProcess ngs
   where
     processMove MoveLeft = return $ moveLeft gs
-    processMove _ = undefined
-    
+    processMove View = error "Not allowed message" -- This should not happen
+
+    -- TODO
+    -- serveView (pid,View) = do
+    --     send pid (viewGS gs)
+    --     return gs
+
 remotable ['stageProcess]
