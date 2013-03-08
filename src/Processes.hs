@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable, TemplateHaskell #-}
+{-# LANGUAGE DeriveDataTypeable, TemplateHaskell, GeneralizedNewtypeDeriving #-}
 module Processes where
 
 import Control.Distributed.Process
@@ -15,16 +15,19 @@ data StageMessage =
     | RotateCW
     | Tick
     | Drop
-    | View
   deriving (Typeable)
 
+-- By using newtypes we get the Binary instances for free
+newtype View = View ProcessId deriving (Typeable, Binary)
+newtype RemoteGameState = RGS GameState deriving (Typeable, Binary)
+
+-- Let's use a simple codification of the possible orders
 instance Binary StageMessage where
     put MoveLeft = put (0::Word8)
     put MoveRight = put (1::Word8)
     put RotateCW = put (2::Word8)
     put Tick = put (3::Word8)
     put Drop = put (4::Word8)
-    put View = put (5::Word8)
 
     get = do t <- get :: Get Word8
              case t of
@@ -33,21 +36,13 @@ instance Binary StageMessage where
                 2 -> return RotateCW
                 3 -> return Tick
                 4 -> return Drop
-                5 -> return View
 
 stageProcess :: GameState -> Process ()
 stageProcess gs = do
-    ngs <- receiveWait [match processMove
-                        -- , match serveView
-                       ]
-    stageProcess ngs
-  where
-    processMove MoveLeft = return $ moveLeft gs
-    processMove View = error "Not allowed message" -- This should not happen
-
-    -- TODO
-    -- serveView (pid,View) = do
-    --     send pid (viewGS gs)
-    --     return gs
+    receiveWait [
+        match $ \ MoveLeft -> stageProcess (moveLeft gs)
+       -- TODO. Rest of moves missing
+       ,match $ \ (View pid) -> send pid (RGS gs) >> stageProcess gs
+      ]
 
 remotable ['stageProcess]

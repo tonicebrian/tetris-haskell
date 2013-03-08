@@ -107,7 +107,8 @@ updateModel ui key = do
              65361 -> left ui -- Left
              65363 -> right ui -- Right
        pid = processId ui
-   runProcess (processNodeId pid) p
+   --runProcess (processNodeId pid) p
+   putStrLn "TODO This has to be changed"
    
 
 drawBoard :: (Int,Int) -> (Int,Int) -> [Block] -> [Block] -> Render()
