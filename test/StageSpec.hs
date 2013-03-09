@@ -3,7 +3,7 @@ module StageSpec where
 import Test.Hspec
 import Stage
 import Core
-import Core.Game
+import Game
 import Data.List
 
 ttt = [TKind,TKind,TKind]

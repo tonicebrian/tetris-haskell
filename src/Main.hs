@@ -43,7 +43,7 @@ main = do
     node <- newLocalNode t initRemoteTable
     pid <- forkProcess node (initializeGame seed)
 
-    let ui = undefined
+    let ui = AUI pid
 
     -- Every so often, we try to run other threads.
     timeoutAddFull (yield >> return True) priorityDefaultIdle 100

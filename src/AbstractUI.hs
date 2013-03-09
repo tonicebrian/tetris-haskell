@@ -8,8 +8,6 @@ module AbstractUI(
         tick,
         dropPiece,
         rotateCW,
-        -- Constructors
-        mkUI
 ) where
 
 import Core
@@ -26,9 +24,6 @@ data AbstractUI = AUI {
 -- Static view. Refactor later. TODO
 view :: AbstractUI -> IO GameView
 view ui = undefined
-
-mkUI :: ProcessId -> AbstractUI 
-mkUI pid = undefined
 
 left :: AbstractUI -> IO()
 left ui@(AUI pid) = undefined
