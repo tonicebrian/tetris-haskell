@@ -17,8 +17,9 @@ executable tetris
                     cairo,
                     mtl,
                     random,
-                    distributed-process >= 0.4,
-                    network-transport-tcp >= 0.3,
+                    distributed-process,
+                    distributed-process-simplelocalnet,
+                    network-transport-tcp,
                     binary
   hs-source-dirs:   src
 

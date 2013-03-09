@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
-module Core.Game(
+module Game(
          GameState(..),
          GameView(..),
          GameStatus(..),
@@ -13,6 +13,7 @@ import qualified Data.Map as Map
 import Data.List
 import Data.Typeable (Typeable)
 import Data.Binary
+import System.Random
 
 data GameState = GameState {
     blocksGS :: [Block],

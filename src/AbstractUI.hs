@@ -13,9 +13,7 @@ module AbstractUI(
 ) where
 
 import Core
-import Core.Game
-import qualified Stage as S
-import System.Random
+import Game
 
 import Processes
 import Control.Distributed.Process
@@ -26,28 +24,24 @@ data AbstractUI = AUI {
 }
 
 -- Static view. Refactor later. TODO
-view :: AbstractUI -> Process GameView
+view :: AbstractUI -> IO GameView
 view ui = undefined
 
-mkUI :: StdGen -> Process ()
-mkUI seed = stageProcess state
-    where
-        state = S.mkState [Block (0,0) TKind] kinds
-        kinds = map (pieces !!) (randomRs (0,(length pieces)-1) seed) 
-        pieces = [IKind,JKind,LKind,OKind,SKind,TKind,ZKind]
+mkUI :: ProcessId -> AbstractUI 
+mkUI pid = undefined
 
-left :: AbstractUI -> Process()
-left ui@(AUI pid) = send pid MoveLeft
+left :: AbstractUI -> IO()
+left ui@(AUI pid) = undefined
 
-right :: AbstractUI -> Process()
+right :: AbstractUI -> IO()
 right ui@(AUI pid) = undefined
 
-tick :: AbstractUI -> Process()
+tick :: AbstractUI -> IO()
 tick ui@(AUI pid) = undefined
 
-dropPiece :: AbstractUI -> Process()
+dropPiece :: AbstractUI -> IO()
 dropPiece ui@(AUI pid) = undefined
 
-rotateCW :: AbstractUI -> Process()
+rotateCW :: AbstractUI -> IO()
 rotateCW ui@(AUI pid) = undefined
 

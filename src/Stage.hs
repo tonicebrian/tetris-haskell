@@ -9,7 +9,7 @@ module Stage(
 where
 
 import Core 
-import Core.Game
+import Game
 import Data.List
 import Data.Maybe
 

@@ -3,11 +3,13 @@ module Processes where
 
 import Control.Distributed.Process
 import Control.Distributed.Process.Closure
-import Core.Game
+import Game
+import Core
 import Stage
 import Data.Typeable (Typeable)
 import Data.Binary
 import Data.Data
+import System.Random
 
 data StageMessage = 
       MoveLeft
@@ -36,6 +38,13 @@ instance Binary StageMessage where
                 2 -> return RotateCW
                 3 -> return Tick
                 4 -> return Drop
+
+initializeGame :: StdGen -> Process ()
+initializeGame seed = stageProcess state
+    where
+        state = Stage.mkState [Block (0,0) TKind] kinds
+        kinds = map (pieces !!) (randomRs (0,(length pieces)-1) seed) 
+        pieces = [IKind,JKind,LKind,OKind,SKind,TKind,ZKind]
 
 stageProcess :: GameState -> Process ()
 stageProcess gs = do

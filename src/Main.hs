@@ -11,13 +11,15 @@ import Control.Concurrent
 import Control.Distributed.Process
 import Control.Distributed.Process.Closure
 import Control.Distributed.Process.Node
+import Control.Distributed.Process.Node (initRemoteTable)
 import Network.Transport.TCP
 
 import System.Random
 
 import AbstractUI
 import Core
-import Core.Game
+import Game
+import Processes
 
 -- Constants
 bluishGray = Color (256*48) (256*99) (256*99)
@@ -35,10 +37,13 @@ main :: IO()
 main = do
     -- Model and process spawn
     seed <- getStdGen 
-    Right transport <- createTransport "127.0.0.1" "8080" defaultTCPParameters
-    node <- newLocalNode transport initRemoteTable
-    pid <- forkProcess node (mkUI seed)
-    let ui = AUI pid
+
+    -- Actors
+    Right t <- createTransport "127.0.0.1" "10501" defaultTCPParameters
+    node <- newLocalNode t initRemoteTable
+    pid <- forkProcess node (initializeGame seed)
+
+    let ui = undefined
 
     -- Every so often, we try to run other threads.
     timeoutAddFull (yield >> return True) priorityDefaultIdle 100
