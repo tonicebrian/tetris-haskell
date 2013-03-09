@@ -40,9 +40,14 @@ instance Binary StageMessage where
 stageProcess :: GameState -> Process ()
 stageProcess gs = do
     receiveWait [
-        match $ \ MoveLeft -> stageProcess (moveLeft gs)
-       -- TODO. Rest of moves missing
-       ,match $ \ (View pid) -> send pid (RGS gs) >> stageProcess gs
+        match $ \ move -> stageProcess (processMove move gs)
+      , match $ \ (View pid) -> send pid (RGS gs) >> stageProcess gs
       ]
+    where
+        processMove MoveLeft = moveLeft
+        processMove MoveRight = moveRight
+        processMove RotateCW = rotateCW
+        processMove Tick = tick
+        processMove Drop = dropPiece
 
 remotable ['stageProcess]
