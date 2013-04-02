@@ -70,5 +70,5 @@ data GameView = GameView {
     currentGV :: [Block],
     nextGV :: [Block],
     statusGV :: GameStatus
-}
+} 
 

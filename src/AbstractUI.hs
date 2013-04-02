@@ -1,6 +1,7 @@
 module AbstractUI(
         -- The View
-        AbstractUI(AUI,processId),
+        AbstractUI(..),
+        GUICommands(..),
 
         view,
         left,
@@ -13,30 +14,34 @@ module AbstractUI(
 import Core
 import Game
 
-import Processes
-import Control.Distributed.Process
-import Control.Distributed.Process.Closure
+import Control.Concurrent as C
 
-data AbstractUI = AUI {
-    processId :: ProcessId
-}
+data GUICommands =
+      MoveLeft
+    | MoveRight
+    | RotateCW
+    | Tick
+    | Drop
+    | View
+
+data AbstractUI = AbstractUI (C.Chan GUICommands) (C.Chan GameView)
 
 -- Static view. Refactor later. TODO
 view :: AbstractUI -> IO GameView
-view ui = undefined
+view (AbstractUI _ reply) = C.readChan reply
 
 left :: AbstractUI -> IO()
-left ui@(AUI pid) = undefined
+left (AbstractUI req _) = C.writeChan req MoveLeft
 
 right :: AbstractUI -> IO()
-right ui@(AUI pid) = undefined
+right (AbstractUI req _) = C.writeChan req MoveRight
 
 tick :: AbstractUI -> IO()
-tick ui@(AUI pid) = undefined
+tick (AbstractUI req _) = C.writeChan req Tick
 
 dropPiece :: AbstractUI -> IO()
-dropPiece ui@(AUI pid) = undefined
+dropPiece (AbstractUI req _) = C.writeChan req Drop
 
 rotateCW :: AbstractUI -> IO()
-rotateCW ui@(AUI pid) = undefined
+rotateCW (AbstractUI req _) = C.writeChan req RotateCW
 

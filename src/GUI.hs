@@ -1,8 +1,9 @@
-module GUI(createGUI) where
+module GUI(createGUI,
+) where
 
 import Control.Monad.State as MS
 import Control.Concurrent.MVar
-import Control.Concurrent
+import Control.Concurrent as C
 import Graphics.UI.Gtk
 import Graphics.UI.Gtk.Gdk.GC hiding (fill)
 import Graphics.Rendering.Cairo
@@ -66,13 +67,8 @@ tickUI ui canvas = do
 -- Redraw handler 
 exposeHandler :: AbstractUI -> DrawWindow ->  EventM EExpose ()
 exposeHandler ui drawin = do
-    -- TODO
-    --runProcess node (do
-    --                  pid <- getSelfPid
-    --                  send pend 
-    --                 -- Wait until a message is received
-    --                )
-    liftIO $ renderWithDrawable drawin (render undefined) -- TODO
+    gv <- liftIO $ view ui
+    liftIO $ renderWithDrawable drawin (render gv) -- TODO
 
 -- Handles all the keyboard interactions
 keyPressHandler :: WidgetClass a => AbstractUI -> a -> EventM EKey ()
@@ -83,16 +79,13 @@ keyPressHandler ui drawin = do
 
 -- Changes the Abstract View
 updateModel :: AbstractUI -> KeyVal -> IO ()
-updateModel ui key = do
-   let p = case key of
+updateModel ui key = 
+          case key of
              32    -> dropPiece ui -- Space
              65362 -> rotateCW ui -- Up
              65364 -> tick ui -- Down
              65361 -> left ui -- Left
              65363 -> right ui -- Right
-       pid = processId ui
-   --runProcess (processNodeId pid) p
-   putStrLn "TODO This has to be changed"
    
 
 drawBoard :: (Int,Int) -> (Int,Int) -> [Block] -> [Block] -> Render()
