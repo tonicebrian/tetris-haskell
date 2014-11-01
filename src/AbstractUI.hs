@@ -23,12 +23,17 @@ data GUICommands =
     | Tick
     | Drop
     | View
+    deriving Show 
 
 data AbstractUI = AbstractUI (C.Chan GUICommands) (C.Chan GameView)
 
 -- Static view. Refactor later. TODO
 view :: AbstractUI -> IO GameView
-view (AbstractUI _ reply) = C.readChan reply
+view (AbstractUI req replies) = do
+    putStrLn "A punto de escribir la petición"
+    C.writeChan req View
+    putStrLn "Esperando la respuesta del agente principal"
+    C.readChan replies
 
 left :: AbstractUI -> IO()
 left (AbstractUI req _) = C.writeChan req MoveLeft

@@ -20,8 +20,10 @@ import Game
 masterProc :: AbstractUI -> ProcessId -> Process () 
 masterProc (AbstractUI requests replies) slaveId = do
     masterId <- getSelfPid
+    liftIO $ putStrLn $ "El pid del master es " ++ show masterId
     forever $ do
         cmd <- liftIO $ C.readChan requests
+        liftIO $ putStrLn ("Recibido un " ++ show cmd)
         case cmd of
             MoveLeft  -> send slaveId P.MoveLeft
             MoveRight -> send slaveId P.MoveRight
@@ -29,9 +31,16 @@ masterProc (AbstractUI requests replies) slaveId = do
             Tick      -> send slaveId P.Tick
             Drop      -> send slaveId P.Drop
             View      -> do
-                send slaveId $ P.View masterId
-                (P.RGS gs) <- expect :: Process P.RemoteGameState
-                liftIO $ writeChan replies (viewGS gs)
+                liftIO $ putStrLn "Antes de enviar el mensaje al agente"
+                send slaveId $ P.RemoteView masterId
+                liftIO $ putStrLn "Esperando a recibir el mensaje de vuelta"
+                --(P.RGS gs) <- expect :: Process P.RemoteGameState
+                algo <- expect
+                case algo of
+                    (P.RGS gs) -> liftIO $ writeChan replies (viewGS gs)
+                    _          -> liftIO $ putStrLn "Recibida otra cosa de vuelta"
+                liftIO $ putStrLn "Recibido el mensaje de vuelta y metiendo la respueta en el canal de replies"
+
 
 wireElements :: Process ()
 wireElements = do

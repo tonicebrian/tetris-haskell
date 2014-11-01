@@ -51,6 +51,8 @@ createGUI ui = do
     canvas `on` exposeEvent $ tryEvent (exposeHandler ui drawin)
     window `on` keyPressEvent $ tryEvent (keyPressHandler ui canvas)
 
+    putStrLn "Before main"
+
     -- Main loop
     mainGUI
 
@@ -59,6 +61,7 @@ createGUI ui = do
 tickUI :: AbstractUI -> DrawingArea -> IO()
 tickUI ui canvas = do
     threadDelay 1000000
+    liftIO $ putStrLn "tick"
     --TODO runProcess node (tick ui) 
     postGUIAsync $ widgetQueueDraw canvas
     tickUI ui canvas
