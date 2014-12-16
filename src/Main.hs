@@ -2,7 +2,7 @@ module Main(Main.main) where
 
 import Graphics.UI.Gtk
 import Graphics.UI.Gtk.Gdk.GC hiding (fill)
-import Graphics.Rendering.Cairo
+import Graphics.Rendering.Cairo as C
 
 import Control.Monad.State as MS
 import Control.Concurrent.MVar
@@ -130,7 +130,7 @@ drawBoard (offx,offy) size blks cp = do
             stroke
         
         buildRectangle :: (Int,Int) -> Double -> Double -> Render()
-        buildRectangle (a,b) x y = rectangle x0 y0 width height
+        buildRectangle (a,b) x y = C.rectangle x0 y0 width height
             where 
                 x0 = (x+fromIntegral offx)*blockSize
                 y0 = (fromIntegral (b+offy)-y)*blockSize
